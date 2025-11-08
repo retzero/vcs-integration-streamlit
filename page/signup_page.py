@@ -1,6 +1,5 @@
 import streamlit as st
 import re
-from utils.otp_handler import generate_otp, send_email
 from utils.db_handler import save_user, verify_duplicate_user
 import time
 
@@ -16,23 +15,9 @@ def input_field(input_param, type):
     elif type == 'number':
         st.session_state[input_param] = st.number_input(input_param, step=1)
 
-def verifyOTP(otp_input):
-    """Verify the OTP input by the user."""
-    if otp_input == st.session_state['otp']:
-        st.success("OTP verified successfully")
-        time.sleep(1)
-        st.session_state['verifying'] = False
-        st.session_state['otp'] = ""
-        save_user(st.session_state['email'], st.session_state['password'], st.session_state['extra_input_params'])
-        st.session_state['page'] = 'login'
-        st.rerun()
-    else:
-        st.error("Invalid OTP")
-
 def saveUser():
     """Just save the new user"""
     st.session_state['verifying'] = False
-    st.session_state['otp'] = ""
     save_user(st.session_state['email'], st.session_state['password'], st.session_state['extra_input_params'])
     st.session_state['page'] = 'login'
     st.rerun()
@@ -46,28 +31,7 @@ def signup_page(extra_input_params=False, confirmPass=False):
             time.sleep(1)
             st.session_state['verifying'] = False
             st.rerun()
-        
-        #FIXME: Skip OTP verification
         return saveUser()
-
-        st.write("Verifying OTP...")
-        st.info(f"OTP has been sent to {st.session_state['email']}")
-        print(st.session_state['otp'])
-        if st.session_state['otp'] == "":
-            st.session_state['otp'] = generate_otp()
-            print(st.session_state['otp'])
-            send_email(st.session_state['email'], st.session_state['otp'])
-                
-        with st.empty().container():
-            otp_input = st.text_input(label="Enter OTP", placeholder="Enter OTP")
-            if st.button("Verify OTP"):
-                verifyOTP(otp_input)
-                
-            if st.button("Resend OTP"):
-                sent = False
-                st.session_state['otp'] = generate_otp()
-                send_email(st.session_state['email'], st.session_state['otp'])
-        
     else:
         if st.button("Back to Login"):
             st.session_state['page'] = 'login'

@@ -15,7 +15,7 @@ def app_page():
             if st.button("Logout"):
                 reset_session()
                 st.rerun()
-        
+
     st.title("App Page")
     st.write("Hello World")
     users = get_users()
