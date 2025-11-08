@@ -53,7 +53,7 @@ def create_repository_table(conn, cur):
             id SERIAL PRIMARY KEY,
             origin_server VARCHAR(1023) NOT NULL,
             repository_path VARCHAR(1023) NOT NULL,
-            size_in_bytes INT,
+            size_in_bytes BIGINT,
             committer_emails VARCHAR(1023),
             last_commit_date DATE,
             UNIQUE (origin_server, repository_path)
