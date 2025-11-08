@@ -95,3 +95,16 @@ def get_users():
     conn.close()
     
     return users
+
+
+def get_repos():
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+    
+    cur.execute("SELECT * FROM repository")
+    repos = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    return repos

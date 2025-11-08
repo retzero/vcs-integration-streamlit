@@ -2,6 +2,9 @@ import streamlit as st
 from utils.db_handler import get_users
 from utils.init_session import reset_session
 
+from page.repository_manager import run as repo_view
+
+
 def app_page():
     with st.sidebar:
         if st.session_state['guest_mode']:
@@ -21,5 +24,10 @@ def app_page():
     users = get_users()
     if users:
         st.table(users)
+    
+    #repos = get_repos()
+    #if repos:
+    #    st.table(repos)
+    repo_view()
     
 
