@@ -2,6 +2,8 @@ import psycopg2
 from psycopg2 import sql
 from dotenv import load_dotenv
 import os
+import bcrypt
+
 load_dotenv()
 
 # Database connection parameters
@@ -25,35 +27,7 @@ def create_database():
     cur.close()
     conn.close()
 
-def create_table():
-    # Connect to the new database
-    conn = psycopg2.connect(**db_params)
-    cur = conn.cursor()
-    """System Prompt
-    Create a PostgreSQL table schema for a user management system. The table should have the following columns:
-
-    1. `id`: A primary key of type SERIAL.
-    2. `email`: A unique, non-nullable VARCHAR(255) field.
-    3. `hash_password`: A non-nullable TEXT field.
-
-    Additionally, include the following columns based on user input parameters:
-
-    <extra_input_params> = {
-        
-    }
-
-    The generated SQL should be a valid `CREATE TABLE` command in PostgreSQL.
-    
-    output format:
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        hash_password TEXT NOT NULL,
-        <extra_input_param> <extra_input_param type> NOT NULL,
-    );
-
-    """
-    # Create the table
+def create_user_table(conn, cur):
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -61,10 +35,54 @@ def create_table():
             hash_password TEXT NOT NULL
         );
     """)
-    
     conn.commit()
+
+def create_vcs_server_table(conn, cur):
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS vcs_server (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) UNIQUE NOT NULL,
+            url VARCHAR(255)
+        );
+    """)
+    conn.commit()
+
+def create_repository_table(conn, cur):
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS repository (
+            id SERIAL PRIMARY KEY,
+            origin_server VARCHAR(1023) NOT NULL,
+            repository_path VARCHAR(1023) NOT NULL,
+            size_in_bytes INT,
+            committer_emails VARCHAR(1023),
+            last_commit_date DATE,
+            UNIQUE (origin_server, repository_path)
+        );
+    """)
+    conn.commit()
+
+def create_superuser(conn, cur):
+
+    hhashed_password = bcrypt.hashpw(os.getenv("admin_password").encode(), bcrypt.gensalt()).decode('utf-8')
+    cur.execute(f"""
+        INSERT INTO users (email, hash_password) VALUES('{os.getenv("admin_username")}', '{hhashed_password}');
+    """)
+    conn.commit()
+
+
+def create_table():
+    # Connect to the new database
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    create_user_table(conn, cur)
+    create_vcs_server_table(conn, cur)
+    create_repository_table(conn, cur)
+    create_superuser(conn, cur)
+
     cur.close()
     conn.close()
+
 
 if __name__ == "__main__":
     try:
