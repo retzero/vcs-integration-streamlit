@@ -29,6 +29,14 @@ def verifyOTP(otp_input):
     else:
         st.error("Invalid OTP")
 
+def saveUser():
+    """Just save the new user"""
+    st.session_state['verifying'] = False
+    st.session_state['otp'] = ""
+    save_user(st.session_state['email'], st.session_state['password'], st.session_state['extra_input_params'])
+    st.session_state['page'] = 'login'
+    st.rerun()
+
 def signup_page(extra_input_params=False, confirmPass=False):
     """Render the signup page with optional extra input parameters and password confirmation."""
     if st.session_state['verifying']:
@@ -39,6 +47,9 @@ def signup_page(extra_input_params=False, confirmPass=False):
             st.session_state['verifying'] = False
             st.rerun()
         
+        #FIXME: Skip OTP verification
+        return saveUser()
+
         st.write("Verifying OTP...")
         st.info(f"OTP has been sent to {st.session_state['email']}")
         print(st.session_state['otp'])

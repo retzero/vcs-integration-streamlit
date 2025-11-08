@@ -7,14 +7,11 @@ from utils.init_session import init_session, reset_session
 init_session()
 
 st.session_state['extra_input_params'] = {
-    'Faculty':'text',
-    'Year':'number',
-    'Semester':'number',
 }
+
 for input_param in st.session_state['extra_input_params'].keys():
     if input_param not in st.session_state:
         st.session_state[input_param] = None
-
 
 if st.session_state['authenticated']:
     app_page()

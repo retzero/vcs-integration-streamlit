@@ -58,10 +58,7 @@ def create_table():
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
             email VARCHAR(255) UNIQUE NOT NULL,
-            hash_password TEXT NOT NULL,
-            Faculty TEXT NOT NULL,
-            Year INTEGER NOT NULL,
-            Semester INTEGER NOT NULL
+            hash_password TEXT NOT NULL
         );
     """)
     
