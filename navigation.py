@@ -16,11 +16,15 @@ for input_param in st.session_state['extra_input_params'].keys():
 if st.session_state['authenticated']:
     app_page()
 else:
-    if st.session_state['page'] == 'login':
-        reset_session()
-        login_page(guest_mode=True)
-    elif st.session_state['page'] == 'signup':
-        signup_page(
-            extra_input_params=False,
-            confirmPass = True
-        )
+    #FIXME:
+    if True:
+        app_page()
+    else:
+        if st.session_state['page'] == 'login':
+            reset_session()
+            login_page(guest_mode=True)
+        elif st.session_state['page'] == 'signup':
+            signup_page(
+                extra_input_params=False,
+                confirmPass = True
+            )

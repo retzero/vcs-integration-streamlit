@@ -109,3 +109,17 @@ def get_repos():
     conn.close()
     
     return columns, repos
+
+
+def delete_repository_table(origin_server: str):
+    if not origin_server:
+        return
+
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    cur.execute(f"DELETE FROM repository WHERE origin_server='{origin_server}'")
+    conn.commit()
+
+    cur.close()
+    conn.close()

@@ -118,7 +118,6 @@ def build_directory_tree_with_value_and_size(data):
 def construct_repo_tree(columns, repos):
 
     result_tree = build_directory_tree_with_value_and_size(repos)
-    pprint(result_tree)
     return result_tree
 
 
