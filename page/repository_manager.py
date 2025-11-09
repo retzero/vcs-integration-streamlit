@@ -16,7 +16,7 @@ def build_directory_tree_with_value(data):
     size_map = defaultdict(int)
 
     for item in data:
-        _, origin_server, repository_path, size, _, _ = item
+        _, origin_server, repository_path, size, _, _, target_server = item
         full_path = f"{origin_server}/{repository_path}"
         parts = full_path.split('/')
         for i in range(1, len(parts) + 1):
@@ -43,7 +43,7 @@ def build_directory_tree_with_value(data):
             formatted_children = format_tree(children_node, new_path)
             item = {
                 "label": f'{label} ({size_into_readible(total_size)})',
-                "value": new_path, # 요청된 value 필드 추가
+                "value": new_path,
                 "total_directory_size": total_size,
                 "children": formatted_children
             }

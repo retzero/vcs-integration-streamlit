@@ -56,6 +56,7 @@ def create_repository_table(conn, cur):
             size_in_bytes BIGINT,
             committer_emails VARCHAR(1023),
             last_commit_date DATE,
+            target_server VARCHAR(1023),
             UNIQUE (origin_server, repository_path)
         );
     """)
