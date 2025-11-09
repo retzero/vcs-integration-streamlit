@@ -110,8 +110,9 @@ def build_directory_tree_with_value_and_size(data):
                 db_id_info = f" (id: {current_db_id})"
 
             # 레이블 형식: label (size, <target-server>, date)
+            additional_label = f"{formatted_size}, {server_info_suffix}, {date_info}".replace(' ', '')
             item = {
-                "label": f"{label} ({formatted_size}, {server_info_suffix}, {date_info})",
+                "label": f"{label} ({additional_label})",
                 "value": f"{new_path}{db_id_info}",
                 "total_directory_size": current_node_size
             }
