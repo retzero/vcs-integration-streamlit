@@ -7,6 +7,8 @@ import re
 import pandas as pd
 import numpy as np
 from pprint import pprint
+from datetime import datetime, timedelta
+from random import randint
 
 load_dotenv()
 
@@ -82,10 +84,11 @@ def fill_repository_table():
     cur = conn.cursor()
 
     for item in records:
+        _fake_date = datetime.now() + timedelta(days=randint(-365, 365))
         try:
             cur.execute(f"""
                 INSERT INTO repository (origin_server, repository_path, size_in_bytes, last_commit_date)
-                VALUES('{item.get("origin_server")}', '{item.get("repo_name")}', {item.get("git_size")}, '{item.get("commit_date")}');
+                VALUES('{item.get("origin_server")}', '{item.get("repo_name")}', {item.get("git_size")}, '{_fake_date}');
             """)
             conn.commit()
         except Exception as err:
