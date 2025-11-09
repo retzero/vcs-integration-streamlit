@@ -157,11 +157,21 @@ def get_target_server_ratio():
     conn = psycopg2.connect(**db_params)
     cur = conn.cursor()
 
-    cur.execute("SELECT target_server, count(*) FROM repository GROUP BY target_server")
+    cur.execute("SELECT target_server, count(*), sum(size_in_bytes) FROM repository GROUP BY target_server")
     records = cur.fetchall()
 
     cur.close()
     conn.close()
     
     return records
+
+def move_repositories_to_server(ids_to_move: list, target_server: str):
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    cur.execute(f"UPDATE repository SET target_server='{target_server}' WHERE id IN ({','.join(ids_to_move)})")
+    conn.commit()
+
+    cur.close()
+    conn.close()
 

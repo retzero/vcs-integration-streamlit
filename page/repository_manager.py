@@ -7,6 +7,9 @@ from collections import defaultdict
 import datetime
 import os
 import math
+import re
+from utils.db_handler import get_target_servers, move_repositories_to_server
+
 
 def format_bytes(bytes_value):
     """바이트 값을 KB, MB, GB 등으로 보기 좋게 변환합니다."""
@@ -34,9 +37,11 @@ def build_directory_tree_with_value_and_size(data):
     target_server_map = {}
     # 경로별 마지막 커밋 날짜를 저장할 맵 추가 (리프 노드 기준)
     last_commit_date_map = {}
+    # 경로별 db_id를 저장할 맵 추가 (리프 노드 기준)
+    db_id_map = {}
 
     for item in data:
-        _, origin_server, repository_path, size, _, last_commit_date, target_server = item
+        db_id, origin_server, repository_path, size, _, last_commit_date, target_server = item
         
         full_path = f"{origin_server}/{repository_path}"
         parts = full_path.split('/')
@@ -52,7 +57,8 @@ def build_directory_tree_with_value_and_size(data):
         target_server_map[full_path] = target_server
         # 리프 노드의 날짜 저장
         last_commit_date_map[full_path] = last_commit_date.strftime('%Y-%m-%d')
-
+        # 리프 노드의 db_id 저장
+        db_id_map[full_path] = db_id
 
     def format_tree_with_labels_and_size(node, current_path=""):
         result = []
@@ -83,7 +89,7 @@ def build_directory_tree_with_value_and_size(data):
                     server_info_suffix = list(children_servers)[0] # 집합에서 값 추출
                 elif len(children_servers) > 1:
                     server_info_suffix = "Multi"
-            
+
             # 2. Date 정보 결정
             date_info = ""
             if not formatted_children: # 리프 노드인 경우
@@ -97,16 +103,22 @@ def build_directory_tree_with_value_and_size(data):
                 else:
                     date_info = 'No Date'
 
+            # 3. db_id 정보 결정 (리프 노드에만 표시)
+            db_id_info = ""
+            if not formatted_children:
+                current_db_id = db_id_map.get(new_path, 'N/A')
+                db_id_info = f" (id: {current_db_id})"
+
             # 레이블 형식: label (size, <target-server>, date)
             item = {
                 "label": f"{label} ({formatted_size}, {server_info_suffix}, {date_info})",
-                "value": new_path,
+                "value": f"{new_path}{db_id_info}",
                 "total_directory_size": current_node_size
             }
             if formatted_children:
                 item["children"] = formatted_children
             result.append(item)
-        
+
         # 현재 레벨의 모든 날짜 정보를 반환하여 상위 부모가 사용하도록 함
         return result, all_descendant_servers, all_descendant_dates
 
@@ -120,17 +132,48 @@ def construct_repo_tree(columns, repos):
     result_tree = build_directory_tree_with_value_and_size(repos)
     return result_tree
 
-
 def run():
 
-    st.subheader("📂 원본 형상 별 데이터")
-
-    if st.button("Refresh"):
-        st.rerun()
+    col1, col2 = st.columns(2, vertical_alignment="center")
+    with col1:
+        st.subheader("📂 원본 형상 별 데이터")
+    with col2:
+        if st.button("Refresh"):
+            st.rerun()
 
     columns, repos = get_repos()
     repo_tree = construct_repo_tree(columns, repos)
     return_select = tree_select(repo_tree, checked=[], expanded=[])
+
+    with st.container(border=True):
+
+        target_server_list = get_target_servers()
+
+        col1, col2 = st.columns(2, vertical_alignment="bottom")
+        with col1:
+            option = st.selectbox(
+                "선택한 git (들)을 어디로 이전하시겠습니까?",
+                [str(x[0]) for x in get_target_servers()],
+            )
+            #st.write("You selected:", option)
+        with col2:
+            repo_move_submit_button = st.button(f'"{option}" 형상 서버로 이동')
+
+        if repo_move_submit_button and option is not None:
+            print(f'(2) Move items to [{option}]')
+            pprint(len(return_select['checked']))
+            target_server = str(option)
+            ids_to_move = []
+            for item in return_select.get('checked', []):
+                try:
+                    _id = re.search(r'.* \(id: ([\d]+)\)', item).groups()[0]
+                    ids_to_move.append(str(int(_id)))
+                except Exception as err:
+                    pass
+            if ids_to_move and len(ids_to_move) > 0:
+                move_repositories_to_server(ids_to_move, target_server)
+            st.rerun()
+
     st.write(return_select)
 
     #if repos:
