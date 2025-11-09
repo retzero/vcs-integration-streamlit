@@ -103,8 +103,9 @@ def get_repos():
     
     cur.execute("SELECT * FROM repository")
     repos = cur.fetchall()
-    
+    columns = [desc[0] for desc in cur.description]
+
     cur.close()
     conn.close()
     
-    return repos
+    return columns, repos
