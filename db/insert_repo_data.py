@@ -29,12 +29,23 @@ db_params = {
 '''
 
 
-def read_data_files():
+def read_data_files(input_file: str = None):
 
+    print('*********')
+    print(input_file)
     report = []
 
-    for _fname in os.listdir('reports'):
-        fname = os.path.join('reports', _fname)
+    default_report_path = 'reports'
+    if input_file:
+        file_list = [input_file]
+    else:
+        file_list = []
+        for _fname in os.listdir(default_report_path):
+            file_list.append(os.path.join(default_report_path, _fname))
+
+    print(f'Go with {file_list}')
+
+    for fname in file_list:
         if not os.path.isfile(fname):
             continue
         if not fname.endswith('.csv'):
@@ -76,9 +87,9 @@ def read_data_files():
     return report
 
 
-def fill_repository_table():
+def fill_repository_table(input_file: str = None):
 
-    records = read_data_files()
+    records = read_data_files(input_file)
 
     conn = psycopg2.connect(**db_params)
     cur = conn.cursor()
