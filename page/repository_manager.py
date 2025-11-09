@@ -126,7 +126,7 @@ def run():
     st.title("🐙 Streamlit-tree-select")
     st.subheader("A simple and elegant checkbox tree for Streamlit.")
 
-    if st.button("Reset"):
+    if st.button("Refresh"):
         st.rerun()
 
     columns, repos = get_repos()
@@ -134,5 +134,5 @@ def run():
     return_select = tree_select(repo_tree, checked=[], expanded=[])
     st.write(return_select)
 
-    if repos:
-        st.table(repos)
+    #if repos:
+    #    st.table(repos)

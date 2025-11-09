@@ -62,13 +62,26 @@ def create_repository_table(conn, cur):
     """)
     conn.commit()
 
-def create_superuser(conn, cur):
-
-    hhashed_password = bcrypt.hashpw(os.getenv("admin_password").encode(), bcrypt.gensalt()).decode('utf-8')
-    cur.execute(f"""
-        INSERT INTO users (email, hash_password) VALUES('{os.getenv("admin_username")}', '{hhashed_password}');
+def create_target_server_table(conn, cur):
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS target_server (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(1023) NOT NULL,
+            UNIQUE (name)
+        );
     """)
     conn.commit()
+
+def create_superuser(conn, cur):
+
+    try:
+        hhashed_password = bcrypt.hashpw(os.getenv("admin_password").encode(), bcrypt.gensalt()).decode('utf-8')
+        cur.execute(f"""
+            INSERT INTO users (email, hash_password) VALUES('{os.getenv("admin_username")}', '{hhashed_password}');
+        """)
+        conn.commit()
+    except Exception as err:
+        pass
 
 
 def create_table():
@@ -79,6 +92,7 @@ def create_table():
     create_user_table(conn, cur)
     create_vcs_server_table(conn, cur)
     create_repository_table(conn, cur)
+    create_target_server_table(conn, cur)
     create_superuser(conn, cur)
 
     cur.close()

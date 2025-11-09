@@ -111,6 +111,34 @@ def get_repos():
     return columns, repos
 
 
+def get_target_servers():
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    cur.execute("SELECT name FROM target_server")
+    records = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    
+    return records
+
+
+def create_target_server(server_name: str):
+
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    try:
+        cur.execute(f"INSERT INTO target_server (name) VALUES ('{server_name}')")
+        conn.commit()
+    except Exception as err:
+        conn.rollback()
+
+    cur.close()
+    conn.close()
+
+
 def delete_repository_table(origin_server: str):
     if not origin_server:
         return
