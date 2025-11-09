@@ -8,13 +8,11 @@ import datetime
 import os
 
 def build_directory_tree_with_value(data):
-
     def nested_dict():
         return defaultdict(nested_dict)
-
     tree_store = nested_dict()
     size_map = defaultdict(int)
-
+    target_server_map = {} 
     for item in data:
         _, origin_server, repository_path, size, _, _, target_server = item
         full_path = f"{origin_server}/{repository_path}"
@@ -25,32 +23,59 @@ def build_directory_tree_with_value(data):
         current = tree_store
         for part in parts:
             current = current[part]
-
-    def size_into_readible(size):
-        if size > 1024 * 1024 * 1024:
-            return f'{int(size/1024/1024/1024)} GB'
-        if size > 1024 * 1024:
-            return f'{int(size/1024/1024)} MB'
-        if size > 1024:
-            return f'{int(size/1024)} KB'
-        return f'{size} bytes'
-
+        target_server_map[full_path] = target_server
     def format_tree(node, current_path=""):
         result = []
+        child_target_servers = set()
         for label, children_node in node.items():
             new_path = f"{current_path}/{label}" if current_path else label
             total_size = size_map.get(new_path, 0)
-            formatted_children = format_tree(children_node, new_path)
+            formatted_children, children_servers = format_tree(children_node, new_path)
+            child_target_servers.update(children_servers)
             item = {
-                "label": f'{label} ({size_into_readible(total_size)})',
+                "label": label,
                 "value": new_path,
                 "total_directory_size": total_size,
                 "children": formatted_children
             }
             result.append(item)
-        return result
-
-    final_tree = format_tree(tree_store)
+        for item in result:
+            current_item_path = item["value"]
+            if current_item_path in target_server_map:
+                server_val = target_server_map[current_item_path]
+                item["label"] = f"{item['label']} ({server_val})"
+                child_target_servers.add(server_val)
+            else:
+                current_children_servers = set()
+                pass # 아래 최종 로직에서 처리
+        return result, child_target_servers
+    def format_tree_with_labels(node, current_path=""):
+        result = []
+        all_descendant_servers = set()
+        for label, children_node in node.items():
+            new_path = f"{current_path}/{label}" if current_path else label
+            total_size = size_map.get(new_path, 0)
+            formatted_children, children_servers = format_tree_with_labels(children_node, new_path)
+            all_descendant_servers.update(children_servers)
+            server_info_suffix = ""
+            if not formatted_children: # 리프 노드인 경우
+                server_val = target_server_map.get(new_path, 'Unknown')
+                server_info_suffix = f" ({server_val})"
+                all_descendant_servers.add(server_val)
+            else: # 부모 노드인 경우
+                if len(children_servers) == 1:
+                    server_info_suffix = f" ({list(children_servers)[0]})"
+                elif len(children_servers) > 1:
+                    server_info_suffix = " (Multi)"
+            item = {
+                "label": f"{label}{server_info_suffix}",
+                "value": new_path,
+                "total_directory_size": total_size,
+                "children": formatted_children
+            }
+            result.append(item)
+        return result, all_descendant_servers
+    final_tree, _ = format_tree_with_labels(tree_store)
     return final_tree
 
 
