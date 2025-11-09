@@ -33,7 +33,7 @@ def login_page(guest_mode=False):
             if st.button("Sign Up"):
                 st.session_state['page'] = 'signup'
                 st.rerun()
-                
+
             if guest_mode:
                 if st.button("Continue as Guest"):
                     st.session_state['guest_mode'] = True

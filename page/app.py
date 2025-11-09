@@ -7,6 +7,7 @@ import pandas as pd
 from pprint import pprint
 
 from page.repository_manager import run as repo_view
+from page.overview_chart import run as overview_chart
 
 from db.insert_repo_data import fill_repository_table
 from utils.db_handler import delete_repository_table, get_target_servers, create_target_server
@@ -28,6 +29,7 @@ def save_uploaded_file(directory, file):
 
 def app_page():
     with st.sidebar:
+        '''
         if st.session_state['guest_mode']:
             st.subheader("Guest Mode")
             if st.button("Login"):
@@ -37,6 +39,7 @@ def app_page():
             if st.button("Logout"):
                 reset_session()
                 st.rerun()
+        '''
 
         with st.container(border=True):
             st.subheader('CSV 파일 추가')
@@ -68,15 +71,6 @@ def app_page():
                     st.rerun()
 
 
-    st.title("App Page")
-    st.write("Hello World")
-    users = get_users()
-    if users:
-        st.table(users)
-    
-    #repos = get_repos()
-    #if repos:
-    #    st.table(repos)
+    overview_chart()
     repo_view()
-    
 

@@ -18,13 +18,15 @@ if st.session_state['authenticated']:
 else:
     #FIXME:
     if True:
-        app_page()
-    else:
-        if st.session_state['page'] == 'login':
-            reset_session()
-            login_page(guest_mode=True)
-        elif st.session_state['page'] == 'signup':
-            signup_page(
-                extra_input_params=False,
-                confirmPass = True
-            )
+        st.session_state['guest_mode'] = True
+        st.session_state['authenticated'] = True
+        st.session_state['page'] = 'app'
+        st.rerun()
+    elif st.session_state['page'] == 'login':
+        reset_session()
+        login_page(guest_mode=True)
+    elif st.session_state['page'] == 'signup':
+        signup_page(
+            extra_input_params=False,
+            confirmPass = True
+        )

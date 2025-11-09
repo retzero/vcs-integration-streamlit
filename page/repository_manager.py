@@ -123,8 +123,7 @@ def construct_repo_tree(columns, repos):
 
 def run():
 
-    st.title("🐙 Streamlit-tree-select")
-    st.subheader("A simple and elegant checkbox tree for Streamlit.")
+    st.subheader("📂 원본 형상 별 데이터")
 
     if st.button("Refresh"):
         st.rerun()

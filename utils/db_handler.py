@@ -151,3 +151,17 @@ def delete_repository_table(origin_server: str):
 
     cur.close()
     conn.close()
+
+
+def get_target_server_ratio():
+    conn = psycopg2.connect(**db_params)
+    cur = conn.cursor()
+
+    cur.execute("SELECT target_server, count(*) FROM repository GROUP BY target_server")
+    records = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    
+    return records
+
