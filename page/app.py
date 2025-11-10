@@ -8,6 +8,7 @@ from pprint import pprint
 
 from page.repository_manager import run as repo_view
 from page.overview_chart import run as overview_chart
+from page.slider_view import run as slider_view
 
 from db.insert_repo_data import fill_repository_table
 from utils.db_handler import delete_repository_table, get_target_servers, create_target_server
@@ -71,6 +72,9 @@ def app_page():
                     st.rerun()
 
 
+    slider_view()
+    st.divider()
     overview_chart()
+    st.divider()
     repo_view()
 
